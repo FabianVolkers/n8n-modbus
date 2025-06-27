@@ -84,6 +84,28 @@ export class Modbus implements INodeType {
 				default: 1,
 				description: 'The value to write to the memory address',
 			},
+			{
+				displayName: 'Write Target',
+				displayOptions: {
+					show: {
+						operation: ['write'],
+					},
+				},
+				name: 'writeTarget',
+				type: 'options',
+				options: [
+					{
+						name: 'Register',
+						value: 'register',
+					},
+					{
+						name: 'Coil',
+						value: 'coil',
+					},
+				],
+				default: 'register',
+				noDataExpression: true,
+			},
 		],
 	};
 
