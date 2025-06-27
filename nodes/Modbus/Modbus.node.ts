@@ -137,24 +137,42 @@ export class Modbus implements INodeType {
 
 		if (operation === 'write') {
 			const value = this.getNodeParameter('value', 0) as number;
+			const writeTarget = this.getNodeParameter('writeTarget', 0) as string;
 
 			const buffer = Buffer.alloc(2);
 			buffer.writeInt16BE(value);
 
-			await new Promise((resolve) => {
-				client.writeSingleRegister({ address: memoryAddress, value: buffer }, (err, data) => {
-					if (err) {
-						throw new NodeOperationError(this.getNode(), 'MODBUS Error: ' + err.message);
-					}
-
-					const returnData: IDataObject = {
-						data: data.response,
-					};
-
-					responseData = returnData;
-					resolve(responseData);
+			if(writeTarget === "register"){
+				await new Promise((resolve) => {
+					client.writeSingleRegister({ address: memoryAddress, value: buffer }, (err, data) => {
+						if (err) {
+							throw new NodeOperationError(this.getNode(), 'MODBUS Error: ' + err.message);
+						}
+	
+						const returnData: IDataObject = {
+							data: data.response,
+						};
+	
+						responseData = returnData;
+						resolve(responseData);
+					});
 				});
-			});
+			} else if (writeTarget === "coil"){
+				await new Promise((resolve) => {
+					client.writeSingleCoil({ address: memoryAddress, value: value }, (err, data) => {
+						if (err) {
+							throw new NodeOperationError(this.getNode(), 'MODBUS Error: ' + err.message);
+						}
+	
+						const returnData: IDataObject = {
+							data: data.response,
+						};
+	
+						responseData = returnData;
+						resolve(responseData);
+					});
+				});
+			}
 		}
 
 		return [this.helpers.returnJsonArray(responseData)];
