@@ -1,5 +1,5 @@
 {
-	"name": "n8n-nodes-modbus-trigger",
+	"name": "@fabianvolkers/n8n-nodes-modbus-trigger",
 	"version": "0.2.5",
 	"description": "n8n node to trigger Modbus Address on change",
 	"keywords": [
