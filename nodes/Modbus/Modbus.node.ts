@@ -69,22 +69,6 @@ export class Modbus implements INodeType {
 				description: 'The number of registers to read from',
 			},
 			{
-				displayName: 'Value',
-				displayOptions: {
-					show: {
-						operation: ['write'],
-					},
-				},
-				name: 'value',
-				type: 'number',
-				typeOptions: {
-					maxValue: 32767,
-					minValue: -32768,
-				},
-				default: 1,
-				description: 'The value to write to the memory address',
-			},
-			{
 				displayName: 'Write Target',
 				displayOptions: {
 					show: {
@@ -104,7 +88,43 @@ export class Modbus implements INodeType {
 					},
 				],
 				default: 'register',
-				noDataExpression: true,
+			},
+			{
+				displayName: 'Value',
+				displayOptions: {
+					show: {
+						writeTarget: ['register']
+					},
+				},
+				name: 'value',
+				type: 'number',
+				typeOptions: {
+					maxValue: 32767,
+					minValue: -32768,
+				},
+				default: 1,
+				description: 'The value to write to the memory address',
+			},
+			{
+				displayName: 'Coil Value',
+				displayOptions: {
+					show: {
+						writeTarget: ['coil'],
+					},
+				},
+				name: 'coilValue',
+				type: 'options',
+				options: [
+					{
+						name: 'On',
+						value: 0xFF00,
+					},
+					{
+						name: 'Off',
+						value: 0x0000,
+					},
+				],
+				default: 0xFF00,
 			},
 		],
 	};
@@ -136,13 +156,15 @@ export class Modbus implements INodeType {
 		}
 
 		if (operation === 'write') {
-			const value = this.getNodeParameter('value', 0) as number;
+			
 			const writeTarget = this.getNodeParameter('writeTarget', 0) as string;
 
-			const buffer = Buffer.alloc(2);
-			buffer.writeInt16BE(value);
-
 			if(writeTarget === "register"){
+				const value = this.getNodeParameter('value', 0) as number;
+				
+				const buffer = Buffer.alloc(2);
+				buffer.writeInt16BE(value);
+				
 				await new Promise((resolve) => {
 					client.writeSingleRegister({ address: memoryAddress, value: buffer }, (err, data) => {
 						if (err) {
@@ -158,6 +180,7 @@ export class Modbus implements INodeType {
 					});
 				});
 			} else if (writeTarget === "coil"){
+				const value = this.getNodeParameter('coilValue', 0) as number
 				await new Promise((resolve) => {
 					client.writeSingleCoil({ address: memoryAddress, value: value }, (err, data) => {
 						if (err) {
